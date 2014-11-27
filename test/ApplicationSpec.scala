@@ -1,6 +1,7 @@
 import org.specs2.mutable._
 import org.specs2.runner._
 import org.junit.runner._
+import play.api.libs.json.Json
 
 import play.api.test._
 import play.api.test.Helpers._
@@ -15,16 +16,15 @@ class ApplicationSpec extends Specification {
 
   "Application" should {
 
-    "send 404 on a bad request" in new WithApplication{
-      route(FakeRequest(GET, "/boum")) must beNone
-    }
+    "return an experimentId when creating a new experiment" in new WithApplication{
+      val response = route(FakeRequest(Helpers.POST, "/api/experiments", FakeHeaders(), """ {"name": "New Group", "collabs": ["foo", "asdf"]} """)).get
 
-    "render the index page" in new WithApplication{
-      val home = route(FakeRequest(GET, "/")).get
+      status(response) must equalTo(OK)
+      contentType(response) must beSome("application/json")
+      charset(response) must beSome("utf-8")
 
-      status(home) must equalTo(OK)
-      contentType(home) must beSome.which(_ == "text/html")
-      contentAsString(home) must contain ("Your new application is ready.")
+      val responseBody = Json.parse(contentAsString(response))
+      (responseBody \ "success").as[Boolean] must equalTo(true)
     }
   }
 }
