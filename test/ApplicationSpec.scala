@@ -16,8 +16,40 @@ class ApplicationSpec extends Specification {
 
   "Application" should {
 
-    "return an experimentId when creating a new experiment" in new WithApplication{
-      val response = route(FakeRequest(Helpers.POST, "/api/experiments", FakeHeaders(), """ {"name": "New Group", "collabs": ["foo", "asdf"]} """)).get
+    "return an experimentId when creating a new experiment" in new WithApplication {
+      val response = route(
+        FakeRequest(
+          Helpers.POST,
+          "/api/experiments",
+          FakeHeaders(),
+          """
+            |{
+            |  "name": "Checkout page buttons",
+            |  "scope": 100.0,
+            |  "variations": [
+            |    {
+            |      "name": "Group A",
+            |      "weight": 70.0,
+            |      "params": [
+            |        {
+            |          "name": "foo",
+            |          "value": "bar"
+            |        }
+            |      ]
+            |    },
+            |    {
+            |      "name": "Group B",
+            |      "weight": 30.0,
+            |      "params": [
+            |        {
+            |          "name": "foo",
+            |          "value": "baz"
+            |        }
+            |      ]
+            |    }
+            |  ]
+            |}
+          """.stripMargin)).get
 
       status(response) must equalTo(OK)
       contentType(response) must beSome("application/json")
