@@ -52,6 +52,7 @@ class ApplicationSpec extends Specification {
 
       val responseBody = Json.parse(contentAsString(response))
       (responseBody \ "success").as[Boolean] must equalTo(true)
+      (responseBody \ "experimentId").as[Int] must equalTo(1)
     }
   }
 }

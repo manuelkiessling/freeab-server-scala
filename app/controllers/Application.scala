@@ -1,6 +1,5 @@
 package controllers
 
-import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 
@@ -11,7 +10,13 @@ object Application extends Controller {
   }
 
   def save = Action {
-    Ok(Json.toJson(Map("success" -> true)))
+    val formExperiment = models.FormExperiment("foo", 50.0f)
+    models.Experiment.add(formExperiment) match {
+      case Some(experiment) => {
+        Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsNumber(experiment.id))))
+      }
+      case None => InternalServerError
+    }
   }
 
 }
