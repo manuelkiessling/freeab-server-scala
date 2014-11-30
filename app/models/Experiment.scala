@@ -1,11 +1,9 @@
 package models
 
-import anorm.SQL
-import anorm.RowParser
 import anorm.SqlParser._
-import anorm.~
-import play.api.db.DB
+import anorm.{RowParser, SQL, ~}
 import play.api.Play.current
+import play.api.db.DB
 
 case class Experiment(
   id: Int,
