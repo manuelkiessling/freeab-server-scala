@@ -125,7 +125,13 @@ class ExperimentsApiSpec extends Specification {
           """.stripMargin)).get
 
       status(response) must equalTo(400)
+      contentType(response) must beSome("application/json")
+      charset(response) must beSome("utf-8")
 
+      val responseBody = Json.parse(contentAsString(response))
+      (responseBody \ "success").as[Boolean] must equalTo(false)
+      (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
+      (responseBody \ "error" \ "detail").as[String] must equalTo("An experiment with this name already exists")
     }
 
   }
