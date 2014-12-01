@@ -55,7 +55,7 @@ class ExperimentsApiSpec extends Specification {
       (responseBody \ "experimentId").as[Int] must equalTo(1)
     }
 
-    "should not allow to add two experiments with the same name" in new WithApplication {
+    "not allow to add two experiments with the same name" in new WithApplication {
       route(
         FakeRequest(
           Helpers.POST,
