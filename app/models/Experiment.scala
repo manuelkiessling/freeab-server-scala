@@ -8,7 +8,7 @@ import play.api.db.DB
 case class Experiment(
   id: Int,
   name: String,
-  scope: Float
+  scope: Double
 )
 
 object Experiment {
@@ -16,7 +16,7 @@ object Experiment {
   val experimentParser: RowParser[Experiment] = {
     int("id") ~
     str("name") ~
-    float("scope") map {
+    double("scope") map {
       case id ~ name ~ scope => Experiment(id, name, scope)
     }
   }

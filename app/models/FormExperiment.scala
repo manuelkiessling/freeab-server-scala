@@ -2,5 +2,6 @@ package models
 
 case class FormExperiment(
   name: String,
-  scope: Float
+  scope: Double,
+  formVariations: List[FormVariation]
 )
