@@ -49,8 +49,6 @@ class ExperimentsApiSpec extends Specification {
           FakeHeaders(),
           json)).get
 
-      println(contentAsString(response))
-
       status(response) must equalTo(OK)
       contentType(response) must beSome("application/json")
       charset(response) must beSome("utf-8")

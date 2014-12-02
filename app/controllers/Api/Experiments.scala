@@ -71,19 +71,21 @@ object Experiments extends Controller {
 
       )
     } catch {
-      case jse: JdbcSQLException => BadRequest(
-        Json.toJson(
-          Map(
-            "success" -> JsBoolean(false),
-            "error" -> Json.toJson(
-              Map(
-                "message" -> "Bad Request",
-                "detail" -> "An experiment with this name already exists"
+      case jse: JdbcSQLException => {
+        BadRequest(
+          Json.toJson(
+            Map(
+              "success" -> JsBoolean(false),
+              "error" -> Json.toJson(
+                Map(
+                  "message" -> "Bad Request",
+                  "detail" -> "An experiment with this name already exists"
+                )
               )
             )
           )
         )
-      )
+      }
     }
   }
 
