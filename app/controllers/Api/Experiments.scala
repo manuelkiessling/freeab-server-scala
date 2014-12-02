@@ -23,6 +23,7 @@ object Experiments extends Controller {
     val formExperimentResult = request.body.validate[FormExperiment]
     try {
       formExperimentResult.fold(
+
         errors => {
           BadRequest(
             Json.toJson(
@@ -38,13 +39,12 @@ object Experiments extends Controller {
             )
           )
         },
-        formExperiment => {
 
+        formExperiment => {
           def variationsSum(xs: List[FormVariation]): Double = {
             if (xs.isEmpty) 0.0
             else xs.head.weight + variationsSum(xs.tail)
           }
-
           if (variationsSum(formExperiment.formVariations) != 100.0) {
             BadRequest(
               Json.toJson(
@@ -68,6 +68,7 @@ object Experiments extends Controller {
             }
           }
         }
+
       )
     } catch {
       case jse: JdbcSQLException => BadRequest(
