@@ -8,6 +8,11 @@ import play.api.libs.functional.syntax._
 
 object Experiments extends Controller {
 
+  private def variationsSum(xs: List[FormVariation]): Double = {
+    if (xs.isEmpty) 0.0
+    else xs.head.weight + variationsSum(xs.tail)
+  }
+
   implicit val formVariationReads: Reads[FormVariation] = (
     (JsPath \ "name").read[String] and
       (JsPath \ "weight").read[Double]
@@ -41,10 +46,6 @@ object Experiments extends Controller {
         },
 
         formExperiment => {
-          def variationsSum(xs: List[FormVariation]): Double = {
-            if (xs.isEmpty) 0.0
-            else xs.head.weight + variationsSum(xs.tail)
-          }
           if (variationsSum(formExperiment.formVariations) != 100.0) {
             BadRequest(
               Json.toJson(
