@@ -1,3 +1,5 @@
+organization := "net.kiessling.manuel"
+
 name := """freeab-server"""
 
 version := "1.0-SNAPSHOT"
