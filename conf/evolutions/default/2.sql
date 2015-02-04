@@ -1,7 +1,7 @@
 # --- !Ups
 
-ALTER TABLE experiments ADD UNIQUE (name);
+CREATE UNIQUE INDEX experiments_name ON experiments (name);
 
 # --- !Downs
 
-ALTER TABLE experiments DROP UNIQUE (name);
+DROP INDEX experiments_name;

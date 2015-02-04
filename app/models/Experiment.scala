@@ -1,12 +1,13 @@
 package models
 
+import java.util.UUID
 import anorm.SqlParser._
 import anorm.{RowParser, SQL, ~}
 import play.api.Play.current
 import play.api.db.DB
 
 case class Experiment(
-  id: Int,
+  id: String,
   name: String,
   scope: Double
 )
@@ -22,7 +23,7 @@ case class Experiment(
 object Experiment {
 
   val experimentParser: RowParser[Experiment] = {
-    int("id") ~
+    str("id") ~
     str("name") ~
     double("scope") map {
       case id ~ name ~ scope => Experiment(id, name, scope)
@@ -30,25 +31,34 @@ object Experiment {
   }
 
   def add(formExperiment: FormExperiment): Option[Experiment] = DB.withConnection { implicit connection =>
-    val result = SQL(
-      """INSERT INTO experiments (name, scope) VALUES ({name}, {scope})""")
+    val experimentId = UUID.randomUUID().toString()
+    val sql = SQL(
+      """INSERT INTO experiments (id, name, scope) VALUES ({experimentId}, {name}, {scope})""")
       .on(
+        "experimentId" -> experimentId,
         "name" -> formExperiment.name,
         "scope" -> formExperiment.scope
-      ).executeInsert()
+      )
+    val result = sql.executeInsert() // TODO: We should handle errors/exceptions right here
 
     result match {
-      case Some(id) => {
+      case Some(id) => { // TODO: In which case would result be None?
         for (formVariation <- formExperiment.formVariations) {
+          val variationId = UUID.randomUUID().toString()
+          val sql =
           SQL(
-            """INSERT INTO variations (experiment_id, name, weight) VALUES ({experimentId}, {name}, {weight})""")
+            """INSERT INTO variations (id, experiment_id, name, weight) VALUES ({variationId}, {experimentId}, {name}, {weight})""")
             .on(
-              "experimentId" -> id.asInstanceOf[Int],
+              "variationId" -> variationId,
+              "experimentId" -> experimentId,
               "name" -> formVariation.name,
-              "weight" -> formVariation.weight
-            ).executeInsert()
+              "weight" -> formVariation.weight.toFloat
+            )
+          sql.execute() // Using executeInsert() results in an SQLException with message "statement is not executing", although it actually executes
+                        // See http://stackoverflow.com/a/25816619
+                        // TODO: We should handle errors/exceptions right here
         }
-        Option[Experiment](Experiment(id.asInstanceOf[Int], formExperiment.name, formExperiment.scope))
+        Option[Experiment](Experiment(experimentId, formExperiment.name, formExperiment.scope))
       }
       case None => None
     }

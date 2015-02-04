@@ -1,7 +1,7 @@
 # --- !Ups
 
 CREATE TABLE experiments (
-    id int SERIAL PRIMARY KEY,
+    id varchar PRIMARY KEY,
     name varchar NOT NULL,
     scope float NOT NULL);
 

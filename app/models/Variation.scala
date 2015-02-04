@@ -1,13 +1,15 @@
 package models
 
+import java.util.UUID
+
 import anorm.SqlParser._
 import anorm.{RowParser, SQL, ~}
 import play.api.Play.current
 import play.api.db.DB
 
 case class Variation(
-  id: Int,
-  experimentId: Int,
+  id: String,
+  experimentId: String,
   name: String,
   weight: Double
 )
@@ -15,15 +17,17 @@ case class Variation(
 object Variation {
 
   val variationParser: RowParser[Variation] = {
-    int("id") ~
-    int("experiment_id") ~
+    str("id") ~
+    str("experiment_id") ~
     str("name") ~
     double("weight") map {
       case id ~ experimentId ~ name ~ weight => Variation(id, experimentId, name, weight)
     }
   }
 
-  def add(formVariation: FormVariation, experimentId: Int): Option[Variation] = DB.withConnection { implicit connection =>
+  /**
+  def add(formVariation: FormVariation, experimentId: String): Option[Variation] = DB.withConnection { implicit connection =>
+    val vaId = UUID.randomUUID().toString()
     val result = SQL(
       """INSERT INTO variations (experiment_id, name, weight) VALUES ({experimentId}, {name}, {scope})""").on(
         "experimentId" -> experimentId,
@@ -32,9 +36,10 @@ object Variation {
       ).executeInsert()
 
     result match {
-      case Some(id) => Option[Variation](Variation(id.asInstanceOf[Int], experimentId, formVariation.name, formVariation.weight))
+      case Some(id) => Option[Variation](Variation(id, experimentId, formVariation.name, formVariation.weight))
       case None => None
     }
   }
+    */
 
 }

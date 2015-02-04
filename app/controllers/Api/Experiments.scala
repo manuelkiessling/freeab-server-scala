@@ -1,7 +1,7 @@
 package controllers.Api
 
+import java.sql.SQLException
 import models.{FormExperiment, FormVariation}
-import org.h2.jdbc.JdbcSQLException
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.functional.syntax._
@@ -57,10 +57,10 @@ object Experiments extends Controller {
           try {
             val experimentOption = models.Experiment.add(formExperiment)
             experimentOption.map( experiment =>
-              Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsNumber(experiment.id))))
+              Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsString(experiment.id))))
             ) getOrElse InternalServerError
           } catch {
-            case jse: JdbcSQLException => {
+            case e: SQLException => { // TODO: This is way too generic
               badRequest("An experiment with this name already exists")
             }
           }
