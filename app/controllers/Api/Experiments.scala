@@ -1,12 +1,13 @@
 package controllers.Api
 
 import java.sql.SQLException
+import controllers.Configuration
 import models.{FormExperiment, FormVariation}
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.functional.syntax._
 
-object Experiments extends Controller {
+object Experiments extends Controller with Configuration {
 
   private def variationsSum(xs: List[FormVariation]): Double = {
     if (xs.isEmpty) 0.0
@@ -60,7 +61,7 @@ object Experiments extends Controller {
               Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsString(experiment.id))))
             ) getOrElse InternalServerError
           } catch {
-            case e: SQLException => { // TODO: This is way too generic
+            case e: SQLException => { // TODO: This is way too generic, and the model is a leaky abstraction
               badRequest("An experiment with this name already exists")
             }
           }

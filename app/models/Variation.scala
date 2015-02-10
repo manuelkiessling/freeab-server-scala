@@ -25,7 +25,6 @@ object Variation {
     }
   }
 
-  /**
   def add(formVariation: FormVariation, experimentId: String): Option[Variation] = DB.withConnection { implicit connection =>
     val vaId = UUID.randomUUID().toString()
     val result = SQL(
@@ -36,10 +35,9 @@ object Variation {
       ).executeInsert()
 
     result match {
-      case Some(id) => Option[Variation](Variation(id, experimentId, formVariation.name, formVariation.weight))
+      case Some(id) => Option[Variation](Variation(id.toString, experimentId, formVariation.name, formVariation.weight))
       case None => None
     }
   }
-    */
 
 }

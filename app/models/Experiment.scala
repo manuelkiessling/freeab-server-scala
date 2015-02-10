@@ -6,6 +6,8 @@ import anorm.{RowParser, SQL, ~}
 import play.api.Play.current
 import play.api.db.DB
 
+case class DbConfig(dbName: String)
+
 case class Experiment(
   id: String,
   name: String,
@@ -30,7 +32,7 @@ object Experiment {
     }
   }
 
-  def add(formExperiment: FormExperiment): Option[Experiment] = DB.withConnection { implicit connection =>
+  def add(formExperiment: FormExperiment)(implicit dbConfig: DbConfig): Option[Experiment] = DB.withConnection(dbConfig.dbName) { implicit connection =>
     val experimentId = UUID.randomUUID().toString()
     val sql = SQL(
       """INSERT INTO experiments (id, name, scope) VALUES ({experimentId}, {name}, {scope})""")
