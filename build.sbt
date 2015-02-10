@@ -15,3 +15,5 @@ libraryDependencies ++= Seq(
   ws,
   "org.xerial" % "sqlite-jdbc" % "3.8.7"
 )
+
+javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
