@@ -1,7 +1,6 @@
-package controllers.Api
+package controllers.api
 
 import java.sql.SQLException
-import controllers.Configuration
 import models.{FormExperiment, FormVariation}
 import play.api.libs.json._
 import play.api.mvc._

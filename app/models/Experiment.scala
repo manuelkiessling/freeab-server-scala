@@ -6,8 +6,6 @@ import anorm.{RowParser, SQL, ~}
 import play.api.Play.current
 import play.api.db.DB
 
-case class DbConfig(dbName: String)
-
 case class Experiment(
   id: String,
   name: String,
