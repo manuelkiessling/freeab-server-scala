@@ -13,7 +13,7 @@ class ExperimentsApiSpec extends Specification {
   "Experiments API" should {
 
     "return an experimentId when creating a new experiment" in new WithApplication {
-      DB.withConnection { implicit connection =>
+      DB.withConnection("api") { implicit connection =>
         
         SQL("DELETE FROM experiments").execute()
         SQL("DELETE FROM variations").execute()
@@ -71,7 +71,7 @@ class ExperimentsApiSpec extends Specification {
     }
 
     "not allow to add two experiments with the same name" in new WithApplication {
-      DB.withConnection { implicit connection =>
+      DB.withConnection("api") { implicit connection =>
 
         val json: JsValue = Json.parse("""
                                          |{
@@ -128,7 +128,7 @@ class ExperimentsApiSpec extends Specification {
     }
 
     "not allow to add an experiment whose variations weights do not sum up to 100.0" in new WithApplication {
-      DB.withConnection { implicit connection =>
+      DB.withConnection("api") { implicit connection =>
 
         SQL("DELETE FROM experiments").execute()
         SQL("DELETE FROM variations").execute()
