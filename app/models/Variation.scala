@@ -25,19 +25,19 @@ object Variation {
     }
   }
 
-  def add(formVariation: FormVariation, experimentId: String): Option[Variation] = DB.withConnection { implicit connection =>
-    val vaId = UUID.randomUUID().toString()
+  def add(formVariation: FormVariation, experimentId: String)(implicit dbConfig: DbConfig) = DB.withConnection(dbConfig.dbName) { implicit connection =>
+    val variationId = UUID.randomUUID().toString()
     val result = SQL(
-      """INSERT INTO variations (experiment_id, name, weight) VALUES ({experimentId}, {name}, {scope})""").on(
+      """INSERT INTO variations (id, experiment_id, name, weight) VALUES ({variationId}, {experimentId}, {name}, {weight})""")
+      .on(
+        "variationId" -> variationId,
         "experimentId" -> experimentId,
         "name" -> formVariation.name,
-        "weight" -> formVariation.weight
-      ).executeInsert()
-
-    result match {
-      case Some(id) => Option[Variation](Variation(id.toString, experimentId, formVariation.name, formVariation.weight))
-      case None => None
-    }
+        "weight" -> formVariation.weight.toFloat
+      ).execute()
+    // Using executeInsert() results in an SQLException with message "statement is not executing", although it actually executes
+    // See http://stackoverflow.com/a/25816619
+    // TODO: We should handle errors/exceptions right here
   }
 
 }
