@@ -6,7 +6,7 @@ import play.api.libs.json._
 import play.api.mvc._
 import play.api.libs.functional.syntax._
 
-object Experiments extends Controller with Configuration {
+object Experiments extends Controller {
 
   private def variationsSum(xs: List[FormVariation]): Double = {
     if (xs.isEmpty) 0.0
@@ -40,6 +40,10 @@ object Experiments extends Controller with Configuration {
       (JsPath \ "variations").read[List[FormVariation]]
     )(FormExperiment.apply _)
 
+  // @TODO: Find a way to inject those
+  private val variationRepository = new repositories.anorm.Variation("api")
+  private val experimentRepository = new repositories.anorm.Experiment("api", variationRepository)
+  
   def save = Action(BodyParsers.parse.json) { request =>
 
     val formExperimentResult = request.body.validate[FormExperiment]
@@ -55,12 +59,12 @@ object Experiments extends Controller with Configuration {
           badRequest("The sum of the variation weights must be 100.0")
         } else {
           try {
-            val experimentOption = models.Experiment.add(formExperiment)
+            val experimentOption = experimentRepository.add(formExperiment)
             experimentOption.map( experiment =>
               Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsString(experiment.id))))
             ) getOrElse InternalServerError
           } catch {
-            case e: SQLException => { // TODO: This is way too generic, and the model is a leaky abstraction
+            case e: SQLException => { // TODO: This is way too generic, and the repository is a leaky abstraction
               badRequest("An experiment with this name already exists")
             }
           }
