@@ -58,16 +58,10 @@ object Experiments extends Controller {
         if (variationsSum(formExperiment.formVariations) != 100.0) {
           badRequest("The sum of the variation weights must be 100.0")
         } else {
-          try {
-            val experimentOption = experimentRepository.add(formExperiment)
-            experimentOption.map( experiment =>
-              Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsString(experiment.id))))
-            ) getOrElse InternalServerError
-          } catch {
-            case e: SQLException => { // TODO: This is way too generic, and the repository is a leaky abstraction
-              badRequest("An experiment with this name already exists")
-            }
-          }
+          val (experimentOption, errorMessage) = experimentRepository.add(formExperiment)
+          experimentOption.map( experiment =>
+            Ok(Json.toJson(Map("success" -> JsBoolean(true), "experimentId" -> JsString(experiment.id))))
+          ) getOrElse badRequest(errorMessage getOrElse "Unknown error")
         }
       }
 

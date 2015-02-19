@@ -1,5 +1,6 @@
 package repositories.anorm
 
+import java.sql.SQLException
 import java.util.UUID
 import anorm.SqlParser._
 import anorm._
@@ -17,7 +18,7 @@ class Experiment(dbConfigName: String, variationRepository: Variation) {
     }
   }
 
-  def add(formExperiment: FormExperiment): Option[models.Experiment] = DB.withConnection(dbConfigName) { implicit connection =>
+  def add(formExperiment: FormExperiment): (Option[models.Experiment], Option[String]) = DB.withConnection(dbConfigName) { implicit connection =>
     val experimentId = UUID.randomUUID().toString()
     val sql = SQL(
       """INSERT INTO experiments (id, name, scope) VALUES ({experimentId}, {name}, {scope})""")
@@ -26,18 +27,32 @@ class Experiment(dbConfigName: String, variationRepository: Variation) {
         "name" -> formExperiment.name,
         "scope" -> formExperiment.scope
       )
-    val result = sql.executeInsert() // TODO: We should handle errors/exceptions right here
-
-    result match {
-      case Some(id) => {
-        // TODO: In which case would result be None?
-        for (formVariation <- formExperiment.formVariations) {
-          variationRepository.add(formVariation, id.toString)
+    try {
+      val result = sql.executeInsert()
+      result match {
+        case Some(id) => { // TODO: In which case would result be None?
+          for (formVariation <- formExperiment.formVariations) {
+            try {
+              variationRepository.add(formVariation, id.toString)
+            } catch {
+              case e: SQLException => {
+                SQL(
+                  """DELETE FROM experiments WHERE id = {experimentId}""")
+                  .on(
+                    "experimentId" -> experimentId
+                  )
+                return (None, Some("Error while storing the experiment's variations"))
+              }
+            }
+          }
+          (Option[models.Experiment](models.Experiment(experimentId, formExperiment.name, formExperiment.scope)), None)
         }
-        Option[models.Experiment](models.Experiment(experimentId, formExperiment.name, formExperiment.scope))
+        case None => (None, Some("An error occured"))
       }
-      case None => None
+    } catch {
+      case e: SQLException => {
+        return (None, Some("An experiment with this name already exists"))
+      }
     }
-
   }
 }
