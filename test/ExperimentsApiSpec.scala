@@ -173,6 +173,53 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       (responseBody \ "error" \ "detail").as[String] must equalTo("The sum of the variation weights must be 100.0")
     }
 
+    "not allow to add an experiment whose variations names are not unique" in new WithApplication {
+      val json: JsValue = Json.parse("""
+                                       |{
+                                       |  "name": "Checkout page buttons",
+                                       |  "scope": 100.0,
+                                       |  "variations": [
+                                       |    {
+                                       |      "name": "Group A",
+                                       |      "weight": 70.0,
+                                       |      "params": [
+                                       |        {
+                                       |          "name": "foo",
+                                       |          "value": "bar"
+                                       |        }
+                                       |      ]
+                                       |    },
+                                       |    {
+                                       |      "name": "Group A",
+                                       |      "weight": 30.0,
+                                       |      "params": [
+                                       |        {
+                                       |          "name": "foo",
+                                       |          "value": "baz"
+                                       |        }
+                                       |      ]
+                                       |    }
+                                       |  ]
+                                       |}
+                                     """.stripMargin)
+
+      val response = route(
+        FakeRequest(
+          Helpers.POST,
+          "/api/experiments",
+          FakeHeaders(),
+          json)).get
+
+      status(response) must equalTo(400)
+      contentType(response) must beSome("application/json")
+      charset(response) must beSome("utf-8")
+
+      val responseBody = Json.parse(contentAsString(response))
+      (responseBody \ "success").as[Boolean] must equalTo(false)
+      (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
+      (responseBody \ "error" \ "detail").as[String] must equalTo("Variation names must be unique")
+    }
+
   }
 
 }
