@@ -8,11 +8,6 @@ import play.api.libs.functional.syntax._
 
 object Experiments extends Controller {
 
-  private def doVariationsWeightsSumUpCorrectly_?(formVariations: List[FormVariation]): Boolean = {
-    formVariations.map(_.weight).sum == 100.0
-    // TODO: Use ratios instead of percents?
-  }
-  
   private def areVariationsNamesUnique_?(formVariations: List[FormVariation]): Boolean = {
     formVariations.map(_.name).distinct.size == formVariations.size
   }
@@ -50,7 +45,7 @@ object Experiments extends Controller {
       (JsPath \ "scope").read[Double] and
       (JsPath \ "variations").read[List[FormVariation]]
         .filter(ValidationError("Variation names must be unique"))(areVariationsNamesUnique_?)
-        .filter(ValidationError("The sum of the variation weights must be 100.0"))(doVariationsWeightsSumUpCorrectly_?)
+        .filter(ValidationError("The sum of the variation weights must be 100.0"))(_.map(_.weight).sum == 100.0)
     )(FormExperiment.apply _)
 
   def save = Action(BodyParsers.parse.json) { request =>
