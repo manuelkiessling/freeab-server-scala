@@ -18,6 +18,7 @@ class Experiment(dbConfigName: String, variationRepository: Variation) {
     }
   }
 
+  // TODO: Use Either or Try instead of a tuple!
   def add(formExperiment: FormExperiment): (Option[models.Experiment], Option[String]) = DB.withConnection(dbConfigName) { implicit connection =>
     val experimentId = UUID.randomUUID().toString()
     val sql = SQL(
@@ -35,6 +36,7 @@ class Experiment(dbConfigName: String, variationRepository: Variation) {
             try {
               variationRepository.add(formVariation, id.toString)
             } catch {
+              // Spring JDBC kapselt alle DB Typen
               case e: SQLException => {
                 SQL(
                   """DELETE FROM experiments WHERE id = {experimentId}""")

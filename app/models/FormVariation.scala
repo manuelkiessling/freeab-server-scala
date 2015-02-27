@@ -1,6 +1,6 @@
 package models
 
-case class FormVariation(
+final case class FormVariation(
   name: String,
   weight: Double
 )

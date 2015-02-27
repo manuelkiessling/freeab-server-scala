@@ -1,6 +1,6 @@
 package models
 
-case class Variation(
+final case class Variation(
   id: String,
   experimentId: String,
   name: String,

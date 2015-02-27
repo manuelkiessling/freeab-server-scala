@@ -62,7 +62,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       charset(response) must beSome("utf-8")
 
       val responseBody = Json.parse(contentAsString(response))
-      (responseBody \ "success").as[Boolean] must equalTo(true)
+      (responseBody \ "success").as[Boolean] must beTrue
 
       val uuidRegex = """[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89aAbB][a-f0-9]{3}-[a-f0-9]{12}""".r
       val doesMatch = (responseBody \ "experimentId").as[String] match {
@@ -121,7 +121,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       charset(response) must beSome("utf-8")
 
       val responseBody = Json.parse(contentAsString(response))
-      (responseBody \ "success").as[Boolean] must equalTo(false)
+      (responseBody \ "success").as[Boolean] must beFalse
       (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
       (responseBody \ "error" \ "detail").as[String] must equalTo("An experiment with this name already exists")
     }
@@ -168,7 +168,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       charset(response) must beSome("utf-8")
 
       val responseBody = Json.parse(contentAsString(response))
-      (responseBody \ "success").as[Boolean] must equalTo(false)
+      (responseBody \ "success").as[Boolean] must beFalse
       (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
       (responseBody \ "error" \ "detail").as[String] must equalTo("The sum of the variation weights must be 100.0")
     }
@@ -191,7 +191,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
                                        |    },
                                        |    {
                                        |      "name": "Group A",
-                                       |      "weight": 30.0,
+                                       |      "weight": 31.0,
                                        |      "params": [
                                        |        {
                                        |          "name": "foo",
@@ -215,9 +215,10 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       charset(response) must beSome("utf-8")
 
       val responseBody = Json.parse(contentAsString(response))
-      (responseBody \ "success").as[Boolean] must equalTo(false)
+      (responseBody \ "success").as[Boolean] must beFalse
       (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
       (responseBody \ "error" \ "detail").as[String] must equalTo("Variation names must be unique")
+      
     }
 
   }
