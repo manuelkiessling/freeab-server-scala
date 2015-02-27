@@ -8,13 +8,8 @@ import play.api.libs.functional.syntax._
 
 object Experiments extends Controller {
 
-  private def calculateVariantsWeightsSum(formVariations: List[FormVariation]): Double = formVariations match {
-    case Nil => 0.0
-    case head::tail => head.weight + calculateVariantsWeightsSum(tail)
-  }
-
   private def doVariationsWeightsSumUpCorrectly_?(formVariations: List[FormVariation]): Boolean = {
-    calculateVariantsWeightsSum(formVariations) == 100.0
+    formVariations.map(_.weight).sum == 100.0
     // TODO: Use ratios instead of percents?
   }
   
