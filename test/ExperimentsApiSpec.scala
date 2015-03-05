@@ -72,6 +72,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       doesMatch must beTrue
     }
 
+    // TODO: This spec sometimes fails for no obvious reason
     "not allow to add two experiments with the same name" in new WithApplication {
       val json: JsValue = Json.parse("""
                                        |{
@@ -191,7 +192,7 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
                                        |    },
                                        |    {
                                        |      "name": "Group A",
-                                       |      "weight": 31.0,
+                                       |      "weight": 30.0,
                                        |      "params": [
                                        |        {
                                        |          "name": "foo",
