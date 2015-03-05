@@ -222,6 +222,44 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       
     }
 
+    "not allow to add an experiment with less than 2 variations" in new WithApplication {
+      val json: JsValue = Json.parse("""
+                                       |{
+                                       |  "name": "Checkout page buttons",
+                                       |  "scope": 100.0,
+                                       |  "variations": [
+                                       |    {
+                                       |      "name": "Group A",
+                                       |      "weight": 100.0,
+                                       |      "params": [
+                                       |        {
+                                       |          "name": "foo",
+                                       |          "value": "bar"
+                                       |        }
+                                       |      ]
+                                       |    }
+                                       |  ]
+                                       |}
+                                     """.stripMargin)
+
+      val response = route(
+        FakeRequest(
+          Helpers.POST,
+          "/api/experiments",
+          FakeHeaders(),
+          json)).get
+
+      status(response) must equalTo(400)
+      contentType(response) must beSome("application/json")
+      charset(response) must beSome("utf-8")
+
+      val responseBody = Json.parse(contentAsString(response))
+      (responseBody \ "success").as[Boolean] must beFalse
+      (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
+      (responseBody \ "error" \ "detail").as[String] must equalTo("An experiment needs at least 2 variations")
+      
+    }
+
   }
 
 }

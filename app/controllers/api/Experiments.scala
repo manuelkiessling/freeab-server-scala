@@ -44,6 +44,7 @@ object Experiments extends Controller {
     (JsPath \ "name").read[String] and
       (JsPath \ "scope").read[Double] and
       (JsPath \ "variations").read[List[FormVariation]]
+        .filter(ValidationError("An experiment needs at least 2 variations"))(_.size > 1)
         .filter(ValidationError("Variation names must be unique"))(areVariationsNamesUnique_?)
         .filter(ValidationError("The sum of the variation weights must be 100.0"))(_.map(_.weight).sum == 100.0)
     )(FormExperiment.apply _)
