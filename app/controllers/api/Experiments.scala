@@ -79,7 +79,7 @@ object Experiments extends Controller {
         //     )
 
         // TODO: There has to be a better way!
-        val firstJsPathWithProblem = e.errors(0)._1
+        val firstJsPathWithProblem = e.errors.head._1
         firstJsPathWithProblem.path(0) match {
           case KeyPathNode("name") => badRequest("An experiment needs a name")
           case _ => {
