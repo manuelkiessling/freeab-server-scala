@@ -219,7 +219,6 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       (responseBody \ "success").as[Boolean] must beFalse
       (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
       (responseBody \ "error" \ "detail").as[String] must equalTo("Variation names must be unique")
-      
     }
 
     "not allow to add an experiment with less than 2 variations" in new WithApplication {
@@ -257,7 +256,52 @@ class ExperimentsApiSpec extends Specification with BeforeExample {
       (responseBody \ "success").as[Boolean] must beFalse
       (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
       (responseBody \ "error" \ "detail").as[String] must equalTo("An experiment needs at least 2 variations")
-      
+    }
+
+    "should not allow to add an experiment without a name" in new WithApplication {
+      val json: JsValue = Json.parse("""
+                                       |{
+                                       |  "scope": 100.0,
+                                       |  "variations": [
+                                       |    {
+                                       |      "name": "Group A",
+                                       |      "weight": 70.0,
+                                       |      "params": [
+                                       |        {
+                                       |          "name": "foo",
+                                       |          "value": "bar"
+                                       |        }
+                                       |      ]
+                                       |    },
+                                       |    {
+                                       |      "name": "Group B",
+                                       |      "weight": 30.0,
+                                       |      "params": [
+                                       |        {
+                                       |          "name": "foo",
+                                       |          "value": "baz"
+                                       |        }
+                                       |      ]
+                                       |    }
+                                       |  ]
+                                       |}
+                                     """.stripMargin)
+
+      val response = route(
+        FakeRequest(
+          Helpers.POST,
+          "/api/experiments",
+          FakeHeaders(),
+          json)).get
+
+      status(response) must equalTo(400)
+      contentType(response) must beSome("application/json")
+      charset(response) must beSome("utf-8")
+
+      val responseBody = Json.parse(contentAsString(response))
+      (responseBody \ "success").as[Boolean] must beFalse
+      (responseBody \ "error" \ "message").as[String] must equalTo("Bad Request")
+      (responseBody \ "error" \ "detail").as[String] must equalTo("An experiment needs a name")
     }
 
   }
